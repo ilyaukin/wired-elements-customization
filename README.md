@@ -36,6 +36,8 @@ Use it in your web page:
 
 **elevation** - Numerical number between 1-5 (inclusive) - sets the elevation of the card. Default is 1.
 
+**fill** - A color to fill the background of the card in a sketchy format
+
 ## Methods
 
 **requestUpdate()** - When dynamically adding content to the card, call this method to recompute the boundaries of the card. 
