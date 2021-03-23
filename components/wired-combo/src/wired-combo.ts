@@ -1,4 +1,5 @@
 import { WiredBase, customElement, property, TemplateResult, html, css, CSSResult, PropertyValues } from 'wired-lib/lib/wired-base';
+// @ts-ignore
 import { rectangle, polygon } from '../../wired-lib/src/wired-lib';
 import { WiredItem } from '../../wired-item/wired-item/src/wired-item';
 import { WiredCard } from '../../wired-card/wired-card/src/wired-card';
@@ -18,7 +19,7 @@ export class WiredCombo extends WiredBase {
 
   private cardShowing = false;
   private itemNodes: WiredItem[] = [];
-  private lastSelectedItem?: WiredItem;
+  private selectedItem?: WiredItem;
 
   static get styles(): CSSResult {
     return css`
@@ -41,7 +42,7 @@ export class WiredCombo extends WiredBase {
       opacity: 1;
     }
 
-    :host(:focus) path {
+    :host(:focus-within) path {
       stroke-width: 1.5;
     }
   
@@ -92,17 +93,38 @@ export class WiredCombo extends WiredBase {
       box-shadow: 1px 5px 15px -6px rgba(0, 0, 0, 0.8);
     }
 
+    #item-container {
+      max-height: 200px;
+      overflow-y: scroll;
+    }
+
     ::slotted(wired-item) {
       display: block;
+    }
+    
+    #searchInput {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border: none;
+      padding: 8px;
+      font-size: inherit;
+      font-family: inherit;
+      /* for debug */
+      /*background-color: gray;*/
     }
     `;
   }
 
   render(): TemplateResult {
     return html`
+    <input id="searchInput" @keyup="${this.onSearch}">
     <div id="container" @click="${this.onCombo}">
       <div id="textPanel" class="inline">
-        <span>${this.value && this.value.text}</span>
+        <div id="text">
+          <span>${this.value && this.value.text}</span>
+        </div>
       </div>
       <div id="dropPanel" class="inline"></div>
       <div class="overlay">
@@ -111,7 +133,9 @@ export class WiredCombo extends WiredBase {
     </div>
     <wired-card id="card" tabindex="-1" role="listbox" @mousedown="${this.onItemClick}" @touchstart="${this.onItemClick}"
       style="display: none;">
-      <slot id="slot"></slot>
+      <div id="item-container">
+        <slot id="slot"></slot>
+      </div>
     </wired-card>
     `;
   }
@@ -128,7 +152,7 @@ export class WiredCombo extends WiredBase {
   firstUpdated() {
     this.setAttribute('role', 'combobox');
     this.setAttribute('aria-haspopup', 'listbox');
-    this.refreshSelection();
+    this.select(this.getSelectedItemBySelected());
 
     this.addEventListener('blur', () => {
       if (this.cardShowing) {
@@ -136,30 +160,43 @@ export class WiredCombo extends WiredBase {
       }
     });
     this.addEventListener('keydown', (event) => {
+      // here we break (fix?) legacy behaviour:
+      // arrow up,down only select item in the list but do not actually fire
+      // "selected" event, <Enter> fires selected, <Esc> selects last selected value
       switch (event.keyCode) {
-        case 37:
         case 38:
           event.preventDefault();
+          if (!this.cardShowing) {
+            this.setCardShowing(true);
+          }
           this.selectPrevious();
           break;
-        case 39:
         case 40:
           event.preventDefault();
+          if (!this.cardShowing) {
+            this.setCardShowing(true);
+          }
           this.selectNext();
           break;
         case 27:
           event.preventDefault();
           if (this.cardShowing) {
+            this.select(this.getSelectedItemBySelected());
             this.setCardShowing(false);
           }
           break;
         case 13:
           event.preventDefault();
-          this.setCardShowing(!this.cardShowing);
+          if (this.cardShowing) {
+            this.fireSelected();
+            this.setCardShowing(false);
+          } else {
+            this.setCardShowing(true);
+          }
           break;
         case 32:
-          event.preventDefault();
           if (!this.cardShowing) {
+            event.preventDefault();
             this.setCardShowing(true);
           }
           break;
@@ -211,45 +248,39 @@ export class WiredCombo extends WiredBase {
     }
   }
 
-  private refreshSelection() {
-    if (this.lastSelectedItem) {
-      this.lastSelectedItem.selected = false;
-      this.lastSelectedItem.removeAttribute('aria-selected');
-    }
+  private getSelectedItemBySelected() {
     const slot = this.shadowRoot!.getElementById('slot') as HTMLSlotElement;
-    const nodes = slot.assignedNodes();
-    if (nodes) {
-      let selectedItem: WiredItem | null = null;
-      for (let i = 0; i < nodes.length; i++) {
-        const element = nodes[i] as WiredItem;
-        if (element.tagName === 'WIRED-ITEM') {
-          const value = element.value || '';
-          if (this.selected && (value === this.selected)) {
-            selectedItem = element;
-            break;
-          }
-        }
-      }
-      this.lastSelectedItem = selectedItem || undefined;
-      if (this.lastSelectedItem) {
-        this.lastSelectedItem.selected = true;
-        this.lastSelectedItem.setAttribute('aria-selected', 'true');
-      }
-      if (selectedItem) {
-        this.value = {
-          value: selectedItem.value || '',
-          text: selectedItem.textContent || ''
-        };
-      } else {
-        this.value = undefined;
-      }
+    const nodes = slot.assignedNodes() as WiredItem[];
+
+    if (!nodes || !this.selected) {
+      return undefined;
     }
+
+    return nodes.find(node => {
+      return node.tagName === "WIRED-ITEM" && this.selected === node.value;
+    });
   }
 
   private setCardShowing(showing: boolean) {
     this.cardShowing = showing;
     const card = this.shadowRoot!.getElementById('card') as WiredCard;
     card.style.display = showing ? '' : 'none';
+    // show search input
+    const searchInput = this.shadowRoot!.getElementById('searchInput') as HTMLInputElement;
+    searchInput.style.display = showing ? 'block' : 'none';
+    // and immediately activate
+    if (showing) {
+      searchInput.focus();
+      if (searchInput.value) {
+        searchInput.select();
+      }
+    } else {
+      // restore focus on the host
+      this.focus();
+    }
+    // only show text when drop-down isn't open
+    const text = this.shadowRoot!.getElementById('text') as HTMLElement;
+    text.style.display = showing ? 'none': '';
     if (showing) {
       setTimeout(() => {
         card.requestUpdate();
@@ -267,10 +298,35 @@ export class WiredCombo extends WiredBase {
     this.setAttribute('aria-expanded', `${this.cardShowing}`);
   }
 
+  private select(item: WiredItem | undefined) {
+    // update displaying item
+    if (this.selectedItem) {
+      this.selectedItem.selected = false;
+      this.selectedItem.removeAttribute('aria-selected');
+    }
+    if (item) {
+      item.selected = true;
+      item.setAttribute('aria-selected', 'true');
+
+      // scroll to the item if it's out of visible area
+      const area = this.shadowRoot?.getElementById('item-container') as HTMLElement;
+      const item0Offset = this.itemNodes[0].offsetTop;
+      if (area.scrollTop + area.offsetHeight < item.offsetTop - item0Offset
+        || item.offsetTop - item0Offset < area.scrollTop) {
+        area.scrollTo({ top: item.offsetTop - item0Offset });
+      }
+    }
+
+    // update selected item for internal usage,
+    // but not "selected" and "value" attributes,
+    // since for consistence they are only updated
+    // when "selected" event is fired
+    this.selectedItem = item;
+  }
+
   private onItemClick(event: CustomEvent) {
     event.stopPropagation();
-    this.selected = (event.target as WiredItem).value;
-    this.refreshSelection();
+    this.select(event.target as WiredItem);
     this.fireSelected();
     setTimeout(() => {
       this.setCardShowing(false);
@@ -278,52 +334,69 @@ export class WiredCombo extends WiredBase {
   }
 
   private fireSelected() {
+    // update selected
+    this.selected = this.selectedItem ? this.selectedItem.value : '';
+
+    // update value
+    if (this.selectedItem) {
+      this.value = {
+        value: this.selectedItem.value || '',
+        text: this.selectedItem.textContent || ''
+      };
+    } else {
+      this.value = undefined;
+    }
+
     this.fireEvent('selected', { selected: this.selected });
   }
 
   private selectPrevious() {
-    const list = this.itemNodes;
-    if (list.length) {
-      let index = -1;
-      for (let i = 0; i < list.length; i++) {
-        if (list[i] === this.lastSelectedItem) {
-          index = i;
-          break;
-        }
-      }
-      if (index < 0) {
-        index = 0;
-      } else if (index === 0) {
-        index = list.length - 1;
-      } else {
-        index--;
-      }
-      this.selected = list[index].value || '';
-      this.refreshSelection();
-      this.fireSelected();
+    if (!this.itemNodes.length) {
+      return;
     }
+    const item = this.selectedItem?.previousElementSibling as WiredItem
+      || this.itemNodes[this.itemNodes.length - 1];
+    this.select(item);
+
+    const searchInput = this.shadowRoot!.getElementById('searchInput') as HTMLInputElement;
+    searchInput.value = item.textContent || '';
   }
 
   private selectNext() {
-    const list = this.itemNodes;
-    if (list.length) {
-      let index = -1;
-      for (let i = 0; i < list.length; i++) {
-        if (list[i] === this.lastSelectedItem) {
-          index = i;
-          break;
-        }
-      }
-      if (index < 0) {
-        index = 0;
-      } else if (index >= (list.length - 1)) {
-        index = 0;
-      } else {
-        index++;
-      }
-      this.selected = list[index].value || '';
-      this.refreshSelection();
-      this.fireSelected();
+    if (!this.itemNodes.length) {
+      return;
+    }
+    let item = this.selectedItem?.nextElementSibling as WiredItem
+      || this.itemNodes[0];
+    this.select(item);
+
+    const searchInput = this.shadowRoot!.getElementById('searchInput') as HTMLInputElement;
+    searchInput.value = item.textContent || '';
+  }
+
+  private onSearch(event: KeyboardEvent) {
+    if ([38, 40].indexOf(event.keyCode) !== -1) {
+      return;
+    }
+
+    const searchInput = this.shadowRoot!.getElementById('searchInput') as HTMLInputElement;
+    const searchValue = searchInput.value.toLocaleLowerCase();
+
+    // 1) items starting with a search term
+    let item = this.itemNodes.find(item => {
+      return item.textContent?.toLocaleLowerCase().startsWith(searchValue)
+    })
+    if (item) {
+      this.select(item);
+      return;
+    }
+
+    // 2) items containing a search term
+    item = this.itemNodes.find(item => {
+      return item.textContent && item.textContent.toLocaleLowerCase().indexOf(searchValue) !== -1
+    })
+    if (item) {
+      this.select(item);
     }
   }
 

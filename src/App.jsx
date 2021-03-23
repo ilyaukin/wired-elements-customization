@@ -6,9 +6,7 @@ import '../components/wired-item/wired-item/src/wired-item';
 const App = () => {
   return <div>
     <wired-combo>
-      <wired-item value='banana'>Banana</wired-item>
-      <wired-item value='apple'>Apple</wired-item>
-      <wired-item value='long'>Some fruit with a long name</wired-item>
+      {[...Array(500).keys()].map((i) => <wired-item key={i} value={i}>Item {i}</wired-item>)}
     </wired-combo>
   </div>
 }
