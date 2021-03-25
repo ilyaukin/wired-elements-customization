@@ -1,9 +1,9 @@
-import { WiredBase, customElement, property, TemplateResult, html, css, CSSResult, PropertyValues } from 'wired-lib/lib/wired-base';
+import { customElement, property, query, css, TemplateResult, html, LitElement, CSSResult, PropertyValues } from 'lit-element';
 import { rectangle, polygon } from 'wired-lib';
-import { WiredItem } from 'wired-item';
+import { fire } from 'wired-lib/lib/wired-base';
 import { WiredCard } from 'wired-card';
-import 'wired-item';
-import 'wired-card';
+import { WiredItem } from 'wired-item';
+import { randomSeed } from "wired-lib/lib/wired-base";
 
 interface ComboValue {
   value: string;
@@ -11,12 +11,16 @@ interface ComboValue {
 }
 
 @customElement('wired-combo-lazy')
-export class WiredComboLazy extends WiredBase {
+export class WiredComboLazy extends LitElement {
   @property({ type: Array }) values: ComboValue[] = [];
   @property({ type: Object }) value?: ComboValue;
   @property({ type: String }) selected?: string;
   @property({ type: Boolean, reflect: true }) disabled = false;
 
+  @query('svg') private svg?: SVGSVGElement;
+  @query('#card') private card?: WiredCard;
+
+  private seed = randomSeed();
   private cardShowing = false;
   private itemNodes: WiredItem[] = [];
   private selectedItem?: WiredItem;
@@ -211,7 +215,7 @@ export class WiredComboLazy extends WiredBase {
     if (changed.has('disabled')) {
       this.refreshDisabledState();
     }
-    const svg = (this.shadowRoot!.getElementById('svg') as any) as SVGSVGElement;
+    const svg = this.svg!;
     while (svg.hasChildNodes()) {
       svg.removeChild(svg.lastChild!);
     }
@@ -220,15 +224,15 @@ export class WiredComboLazy extends WiredBase {
     svg.setAttribute('height', `${s.height}`);
     const textBounds = this.shadowRoot!.getElementById('textPanel')!.getBoundingClientRect();
     this.shadowRoot!.getElementById('dropPanel')!.style.minHeight = textBounds.height + 'px';
-    rectangle(svg, 0, 0, textBounds.width, textBounds.height);
+    rectangle(svg, 0, 0, textBounds.width, textBounds.height, this.seed);
     const dropx = textBounds.width - 4;
-    rectangle(svg, dropx, 0, 34, textBounds.height);
+    rectangle(svg, dropx, 0, 34, textBounds.height, this.seed);
     const dropOffset = Math.max(0, Math.abs((textBounds.height - 24) / 2));
     const poly = polygon(svg, [
       [dropx + 8, 5 + dropOffset],
       [dropx + 26, 5 + dropOffset],
       [dropx + 17, dropOffset + Math.min(textBounds.height, 18)]
-    ]);
+    ], this.seed);
     poly.style.fill = 'currentColor';
     poly.style.pointerEvents = this.disabled ? 'none' : 'auto';
     poly.style.cursor = 'pointer';
@@ -252,9 +256,11 @@ export class WiredComboLazy extends WiredBase {
   }
 
   private setCardShowing(showing: boolean) {
+    if (!this.card) {
+      return;
+    }
     this.cardShowing = showing;
-    const card = this.shadowRoot!.getElementById('card') as WiredCard;
-    card.style.display = showing ? '' : 'none';
+    this.card.style.display = showing ? '' : 'none';
     // show search input
     const searchInput = this.shadowRoot!.getElementById('searchInput') as HTMLInputElement;
     searchInput.style.display = showing ? 'block' : 'none';
@@ -273,7 +279,7 @@ export class WiredComboLazy extends WiredBase {
     text.style.display = showing ? 'none': '';
     if (showing) {
       setTimeout(() => {
-        card.requestUpdate();
+        this.card!.requestUpdate();
         this.itemNodes.forEach((item) => {
           item.requestUpdate();
         });
@@ -331,7 +337,7 @@ export class WiredComboLazy extends WiredBase {
       this.value = undefined;
     }
 
-    this.fireEvent('selected', { selected: this.selected });
+    fire(this, 'selected', { selected: this.selected });
   }
 
   private selectPrevious() {

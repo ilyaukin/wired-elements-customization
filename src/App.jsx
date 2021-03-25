@@ -1,6 +1,8 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import '../packages/wired-combo-lazy/src/wired-combo-lazy';
+// import '../packages/wired-combo/src/wired-combo';
+// import 'wired-item';
 
 const App = () => {
   function getItems() {
@@ -27,10 +29,12 @@ const App = () => {
 
   // return <div>
   //   <wired-combo>
-  //     {getItems()}
+  //     <wired-item value="banana">Banana</wired-item>
+  //     <wired-item value="apple">Apple</wired-item>
+  //     <wired-item value=''>Some fruit with a long name a</wired-item>
   //   </wired-combo>
   // </div>
-
+  //
   React.useEffect(() => {
     document.getElementById("combo").values = getValues();
     document.getElementById("combo").addEventListener("selected",
