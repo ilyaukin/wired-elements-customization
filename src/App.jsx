@@ -1,8 +1,6 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import '../components/wired-combo/src/wired-combo';
-import '../components/wired-item/wired-item/src/wired-item';
-import '../components/wired-combo-lazy/src/wired-combo-lazy';
+import '../packages/wired-combo-lazy/src/wired-combo-lazy';
 
 const App = () => {
   function getItems() {

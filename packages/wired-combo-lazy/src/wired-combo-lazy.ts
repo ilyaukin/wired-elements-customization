@@ -1,10 +1,9 @@
 import { WiredBase, customElement, property, TemplateResult, html, css, CSSResult, PropertyValues } from 'wired-lib/lib/wired-base';
-// @ts-ignore
-import { rectangle, polygon } from '../../wired-lib/src/wired-lib';
-import { WiredItem } from '../../wired-item/wired-item/src/wired-item';
-import { WiredCard } from '../../wired-card/wired-card/src/wired-card';
-import '../../wired-card/wired-card/src/wired-card';
-import '../../wired-item/wired-item/src/wired-item';
+import { rectangle, polygon } from 'wired-lib';
+import { WiredItem } from 'wired-item';
+import { WiredCard } from 'wired-card';
+import 'wired-item';
+import 'wired-card';
 
 interface ComboValue {
   value: string;
