@@ -1,10 +1,9 @@
 import { customElement, property, query, css, TemplateResult, html, LitElement, CSSResult, PropertyValues } from 'lit-element';
-import { rectangle, polygon, fire } from 'wired-lib';
-
-interface WiredComboItem extends HTMLElement {
-  value: string;
-  selected: boolean;
-}
+import { rectangle, polygon } from 'wired-lib';
+import { fire, WiredBase } from 'wired-lib/lib/wired-base';
+import { WiredCard } from 'wired-card';
+import { WiredItem } from 'wired-item';
+import { randomSeed } from "wired-lib/lib/wired-base";
 
 interface ComboValue {
   value: string;
@@ -18,105 +17,128 @@ export class WiredCombo extends LitElement {
   @property({ type: Boolean, reflect: true }) disabled = false;
 
   @query('svg') private svg?: SVGSVGElement;
-  @query('#card') private card?: HTMLDivElement;
+  @query('#card') private card?: WiredCard;
 
+  private seed = randomSeed();
   private cardShowing = false;
-  private itemNodes: WiredComboItem[] = [];
-  private lastSelectedItem?: WiredComboItem;
+  private itemNodes: WiredItem[] = [];
+  private selectedItem?: WiredItem;
 
   static get styles(): CSSResult {
     return css`
       :host {
         display: inline-block;
         font-family: inherit;
-        position: relative;
-        outline: none;
-        opacity: 0;
-      }
-    
-      :host(.wired-disabled) {
-        opacity: 0.5 !important;
-        cursor: default;
-        pointer-events: none;
-        background: rgba(0, 0, 0, 0.02);
-      }
-      
-      :host(.wired-rendered) {
-        opacity: 1;
-      }
+      position: relative;
+      outline: none;
+      opacity: 0;
+    }
   
-      :host(:focus) path {
-        stroke-width: 1.5;
-      }
+    :host(.wired-disabled) {
+      opacity: 0.5 !important;
+      cursor: default;
+      pointer-events: none;
+      background: rgba(0, 0, 0, 0.02);
+    }
     
-      #container {
-        white-space: nowrap;
-        position: relative;
-      }
-    
-      .inline {
-        display: inline-block;
-        vertical-align: top
-      }
-    
-      #textPanel {
-        min-width: 90px;
-        min-height: 18px;
-        padding: 8px;
-      }
-    
-      #dropPanel {
-        width: 34px;
-        cursor: pointer;
-      }
-    
-      .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        pointer-events: none;
-      }
-    
-      svg {
-        display: block;
-      }
-    
-      path {
-        stroke: currentColor;
-        stroke-width: 0.7;
-        fill: transparent;
-      }
-    
-      #card {
-        display: block;
-        position: absolute;
-        background: var(--wired-combo-popup-bg, white);
-        z-index: 1;
-        box-shadow: 1px 5px 15px -6px rgba(0, 0, 0, 0.8);
-        padding: 8px;
-      }
+    :host(.wired-rendered) {
+      opacity: 1;
+    }
+
+    :host(:focus-within) path {
+      stroke-width: 1.5;
+    }
   
-      ::slotted(wired-item) {
-        display: block;
-      }
+    #container {
+      white-space: nowrap;
+      position: relative;
+    }
+  
+    .inline {
+      display: inline-block;
+      vertical-align: top
+    }
+  
+    #textPanel {
+      min-width: 90px;
+      min-height: 18px;
+      padding: 8px;
+    }
+  
+    #dropPanel {
+      width: 34px;
+      cursor: pointer;
+    }
+  
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+  
+    svg {
+      display: block;
+    }
+  
+    path {
+      stroke: currentColor;
+      stroke-width: 0.7;
+      fill: transparent;
+    }
+  
+    #card {
+      position: absolute;
+      background: var(--wired-combo-popup-bg, white);
+      z-index: 1;
+      box-shadow: 1px 5px 15px -6px rgba(0, 0, 0, 0.8);
+    }
+
+    #item-container {
+      max-height: 200px;
+      overflow-y: scroll;
+    }
+
+    ::slotted(wired-item) {
+      display: block;
+    }
+    
+    #searchInput {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border: none;
+      padding: 8px;
+      font-size: inherit;
+      font-family: inherit;
+      /* for debug */
+      /*background-color: gray;*/
+    }
     `;
   }
 
   render(): TemplateResult {
     return html`
+    <input id="searchInput" @keyup="${this.onSearch}">
     <div id="container" @click="${this.onCombo}">
       <div id="textPanel" class="inline">
-        <span>${this.value && this.value.text}</span>
+        <div id="text">
+          <span>${this.value && this.value.text}</span>
+        </div>
       </div>
       <div id="dropPanel" class="inline"></div>
       <div class="overlay">
-        <svg></svg>
+        <svg id="svg"></svg>
       </div>
     </div>
-    <wired-card id="card" tabindex="-1" role="listbox" @mousedown="${this.onItemClick}" @touchstart="${this.onItemClick}" style="display: none;">
-      <slot id="slot"></slot>
+    <wired-card id="card" tabindex="-1" role="listbox" @mousedown="${this.onItemClick}" @touchstart="${this.onItemClick}"
+      style="display: none;">
+      <div id="item-container">
+        <slot id="slot"></slot>
+      </div>
     </wired-card>
     `;
   }
@@ -133,7 +155,7 @@ export class WiredCombo extends LitElement {
   firstUpdated() {
     this.setAttribute('role', 'combobox');
     this.setAttribute('aria-haspopup', 'listbox');
-    this.refreshSelection();
+    this.select(this.getSelectedItemBySelected());
 
     this.addEventListener('blur', () => {
       if (this.cardShowing) {
@@ -141,30 +163,43 @@ export class WiredCombo extends LitElement {
       }
     });
     this.addEventListener('keydown', (event) => {
+      // here we break (fix?) legacy behaviour:
+      // arrow up,down only select item in the list but do not actually fire
+      // "selected" event, <Enter> fires selected, <Esc> selects last selected value
       switch (event.keyCode) {
-        case 37:
         case 38:
           event.preventDefault();
+          if (!this.cardShowing) {
+            this.setCardShowing(true);
+          }
           this.selectPrevious();
           break;
-        case 39:
         case 40:
           event.preventDefault();
+          if (!this.cardShowing) {
+            this.setCardShowing(true);
+          }
           this.selectNext();
           break;
         case 27:
           event.preventDefault();
           if (this.cardShowing) {
+            this.select(this.getSelectedItemBySelected());
             this.setCardShowing(false);
           }
           break;
         case 13:
           event.preventDefault();
-          this.setCardShowing(!this.cardShowing);
+          if (this.cardShowing) {
+            this.fireSelected();
+            this.setCardShowing(false);
+          } else {
+            this.setCardShowing(true);
+          }
           break;
         case 32:
-          event.preventDefault();
           if (!this.cardShowing) {
+            event.preventDefault();
             this.setCardShowing(true);
           }
           break;
@@ -185,15 +220,15 @@ export class WiredCombo extends LitElement {
     svg.setAttribute('height', `${s.height}`);
     const textBounds = this.shadowRoot!.getElementById('textPanel')!.getBoundingClientRect();
     this.shadowRoot!.getElementById('dropPanel')!.style.minHeight = textBounds.height + 'px';
-    rectangle(svg, 0, 0, textBounds.width, textBounds.height);
+    rectangle(svg, 0, 0, textBounds.width, textBounds.height, this.seed);
     const dropx = textBounds.width - 4;
-    rectangle(svg, dropx, 0, 34, textBounds.height);
+    rectangle(svg, dropx, 0, 34, textBounds.height, this.seed);
     const dropOffset = Math.max(0, Math.abs((textBounds.height - 24) / 2));
     const poly = polygon(svg, [
       [dropx + 8, 5 + dropOffset],
       [dropx + 26, 5 + dropOffset],
-      [dropx + 17, dropOffset + Math.min(textBounds.height, 18)]
-    ]);
+      [dropx + 17, dropOffset + Math.min(textBounds.height, 18)],
+    ], this.seed);
     poly.style.fill = 'currentColor';
     poly.style.pointerEvents = this.disabled ? 'none' : 'auto';
     poly.style.cursor = 'pointer';
@@ -206,7 +241,7 @@ export class WiredCombo extends LitElement {
       const nodes = (this.shadowRoot!.getElementById('slot') as HTMLSlotElement).assignedNodes();
       if (nodes && nodes.length) {
         for (let i = 0; i < nodes.length; i++) {
-          const element = nodes[i] as WiredComboItem;
+          const element = nodes[i] as WiredItem;
           if (element.tagName === 'WIRED-ITEM') {
             element.setAttribute('role', 'option');
             this.itemNodes.push(element);
@@ -216,67 +251,87 @@ export class WiredCombo extends LitElement {
     }
   }
 
-  private refreshSelection() {
-    if (this.lastSelectedItem) {
-      this.lastSelectedItem.selected = false;
-      this.lastSelectedItem.removeAttribute('aria-selected');
-    }
+  private getSelectedItemBySelected() {
     const slot = this.shadowRoot!.getElementById('slot') as HTMLSlotElement;
-    const nodes = slot.assignedNodes();
-    if (nodes) {
-      let selectedItem: WiredComboItem | null = null;
-      for (let i = 0; i < nodes.length; i++) {
-        const element = nodes[i] as WiredComboItem;
-        if (element.tagName === 'WIRED-ITEM') {
-          const value = element.value || element.getAttribute('value') || '';
-          if (this.selected && (value === this.selected)) {
-            selectedItem = element;
-            break;
-          }
-        }
-      }
-      this.lastSelectedItem = selectedItem || undefined;
-      if (this.lastSelectedItem) {
-        this.lastSelectedItem.selected = true;
-        this.lastSelectedItem.setAttribute('aria-selected', 'true');
-      }
-      if (selectedItem) {
-        this.value = {
-          value: selectedItem.value || '',
-          text: selectedItem.textContent || ''
-        };
-      } else {
-        this.value = undefined;
-      }
+    const nodes = slot.assignedNodes() as WiredItem[];
+
+    if (!nodes || !this.selected) {
+      return undefined;
     }
+
+    return nodes.find(node => {
+      return node.tagName === "WIRED-ITEM" && this.selected === node.value;
+    });
   }
 
   private setCardShowing(showing: boolean) {
-    if (this.card) {
-      this.cardShowing = showing;
-      this.card.style.display = showing ? '' : 'none';
-      if (showing) {
-        setTimeout(() => {
-          // TODO: relayout card?
-          const nodes = (this.shadowRoot!.getElementById('slot') as HTMLSlotElement).assignedNodes().filter((d) => {
-            return d.nodeType === Node.ELEMENT_NODE;
-          });
-          nodes.forEach((n) => {
-            const e = n as LitElement;
-            if (e.requestUpdate) {
-              e.requestUpdate();
-            }
-          });
-        }, 10);
-      }
-      this.setAttribute('aria-expanded', `${this.cardShowing}`);
+    if (!this.card) {
+      return;
     }
+    this.cardShowing = showing;
+    this.card.style.display = showing ? '' : 'none';
+    // show search input
+    const searchInput = this.shadowRoot!.getElementById('searchInput') as HTMLInputElement;
+    searchInput.style.display = showing ? 'block' : 'none';
+    // and immediately activate
+    if (showing) {
+      searchInput.focus();
+      if (searchInput.value) {
+        searchInput.select();
+      }
+    } else {
+      // restore focus on the host
+      this.focus();
+    }
+    // only show text when drop-down isn't open
+    const text = this.shadowRoot!.getElementById('text') as HTMLElement;
+    text.style.display = showing ? 'none': '';
+    if (showing) {
+      setTimeout(() => {
+        this.card!.requestUpdate();
+        const nodes = (this.shadowRoot!.getElementById('slot') as HTMLSlotElement).assignedNodes().filter((d) => {
+          return d.nodeType === Node.ELEMENT_NODE;
+        });
+        nodes.forEach((n) => {
+          const e = n as WiredBase;
+          if (e.requestUpdate) {
+            e.requestUpdate();
+          }
+        });
+      }, 10);
+    }
+    this.setAttribute('aria-expanded', `${this.cardShowing}`);
+  }
+
+  private select(item: WiredItem | undefined) {
+    // update displaying item
+    if (this.selectedItem) {
+      this.selectedItem.selected = false;
+      this.selectedItem.removeAttribute('aria-selected');
+    }
+    if (item) {
+      item.selected = true;
+      item.setAttribute('aria-selected', 'true');
+
+      // scroll to the item if it's out of visible area
+      const area = this.shadowRoot?.getElementById('item-container') as HTMLElement;
+      const item0Offset = this.itemNodes[0].offsetTop;
+      if (area.scrollTop + area.offsetHeight < item.offsetTop - item0Offset
+        || item.offsetTop - item0Offset < area.scrollTop) {
+        area.scrollTo({ top: item.offsetTop - item0Offset });
+      }
+    }
+
+    // update selected item for internal usage,
+    // but not "selected" and "value" attributes,
+    // since for consistence they are only updated
+    // when "selected" event is fired
+    this.selectedItem = item;
   }
 
   private onItemClick(event: CustomEvent) {
     event.stopPropagation();
-    this.selected = (event.target as WiredComboItem).value;
-    this.refreshSelection();
+    this.select(event.target as WiredItem);
     this.fireSelected();
     setTimeout(() => {
       this.setCardShowing(false);
@@ -284,52 +339,69 @@ export class WiredCombo extends LitElement {
   }
 
   private fireSelected() {
+    // update selected
+    this.selected = this.selectedItem ? this.selectedItem.value : '';
+
+    // update value
+    if (this.selectedItem) {
+      this.value = {
+        value: this.selectedItem.value || '',
+        text: this.selectedItem.textContent || ''
+      };
+    } else {
+      this.value = undefined;
+    }
+
     fire(this, 'selected', { selected: this.selected });
   }
 
   private selectPrevious() {
-    const list = this.itemNodes;
-    if (list.length) {
-      let index = -1;
-      for (let i = 0; i < list.length; i++) {
-        if (list[i] === this.lastSelectedItem) {
-          index = i;
-          break;
-        }
-      }
-      if (index < 0) {
-        index = 0;
-      } else if (index === 0) {
-        index = list.length - 1;
-      } else {
-        index--;
-      }
-      this.selected = list[index].value || '';
-      this.refreshSelection();
-      this.fireSelected();
+    if (!this.itemNodes.length) {
+      return;
     }
+    const item = this.selectedItem?.previousElementSibling as WiredItem
+      || this.itemNodes[this.itemNodes.length - 1];
+    this.select(item);
+
+    const searchInput = this.shadowRoot!.getElementById('searchInput') as HTMLInputElement;
+    searchInput.value = item.textContent || '';
   }
 
   private selectNext() {
-    const list = this.itemNodes;
-    if (list.length) {
-      let index = -1;
-      for (let i = 0; i < list.length; i++) {
-        if (list[i] === this.lastSelectedItem) {
-          index = i;
-          break;
-        }
-      }
-      if (index < 0) {
-        index = 0;
-      } else if (index >= (list.length - 1)) {
-        index = 0;
-      } else {
-        index++;
-      }
-      this.selected = list[index].value || '';
-      this.refreshSelection();
-      this.fireSelected();
+    if (!this.itemNodes.length) {
+      return;
+    }
+    let item = this.selectedItem?.nextElementSibling as WiredItem
+      || this.itemNodes[0];
+    this.select(item);
+
+    const searchInput = this.shadowRoot!.getElementById('searchInput') as HTMLInputElement;
+    searchInput.value = item.textContent || '';
+  }
+
+  private onSearch(event: KeyboardEvent) {
+    if ([38, 40].indexOf(event.keyCode) !== -1) {
+      return;
+    }
+
+    const searchInput = this.shadowRoot!.getElementById('searchInput') as HTMLInputElement;
+    const searchValue = searchInput.value.toLocaleLowerCase();
+
+    // 1) items starting with a search term
+    let item = this.itemNodes.find(item => {
+      return item.textContent?.toLocaleLowerCase().startsWith(searchValue)
+    })
+    if (item) {
+      this.select(item);
+      return;
+    }
+
+    // 2) items containing a search term
+    item = this.itemNodes.find(item => {
+      return item.textContent && item.textContent.toLocaleLowerCase().indexOf(searchValue) !== -1
+    })
+    if (item) {
+      this.select(item);
     }
   }
 
@@ -337,5 +409,4 @@ export class WiredCombo extends LitElement {
     event.stopPropagation();
     this.setCardShowing(!this.cardShowing);
   }
-
 }

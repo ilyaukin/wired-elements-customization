@@ -1,38 +1,33 @@
 {
-  "name": "wired-combo",
+  "name": "@my-handicapped-pet/wired-combo",
   "version": "2.0.0",
-  "description": "Hand-drawn sketchy selector/combo-box web component",
+  "description": "fork of wiredjs.wired-elements/wired-combo, allows item search by typing",
   "main": "lib/wired-combo.js",
-  "module": "lib/wired-combo.js",
-  "types": "lib/wired-combo.d.ts",
   "scripts": {
-    "tsc": "tsc",
+    "build": "rm -rf ./lib && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wiredjs/wired-elements.git"
+    "url": "git+ssh://git@github.com/ilyaukin/wired-elements-customization.git"
   },
   "keywords": [
-    "selector",
-    "combo",
-    "combobox",
-    "combo-box",
-    "combo box",
-    "listbox",
-    "list box",
-    "webcomponent",
-    "web component",
-    "rough",
     "sketchy",
-    "hand-drawn",
-    "hand drawn",
-    "wireframe"
+    "wired",
+    "webelements",
+    "web-elements",
+    "combo",
+    "combobox"
   ],
-  "author": "Preet Shihn <preetshihn@gmail.com> (https://twitter.com/preetster)",
+  "author": "Ilya Lyaukin",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ilyaukin/wired-elements-customization/issues"
+  },
+  "homepage": "https://github.com/ilyaukin/wired-elements-customization#readme",
   "dependencies": {
     "wired-card": "^2.0.0",
+    "wired-item": "^2.0.0",
     "wired-lib": "^2.0.0"
   }
 }
