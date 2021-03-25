@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/ilyaukin/wired-elements-customization#readme",
   "dependencies": {
+    "roughjs": "^4.3.1",
     "wired-card": "^2.0.0",
     "wired-item": "^2.0.0",
     "wired-lib": "^2.0.0"
