@@ -145,7 +145,6 @@ export class WiredComboLazy extends LitElement {
   }
 
   focus(options?: FocusOptions) {
-    console.log('combo element should be focused')
     super.focus(options);
     this.setCardShowing(true);
   }
