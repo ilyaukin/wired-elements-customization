@@ -39,6 +39,7 @@ const App = () => {
     document.getElementById("combo").values = getValues();
     document.getElementById("combo").addEventListener("selected",
       (e) => console.log(e.detail));
+    document.getElementById("combo").focus();
   })
 
   return <div>

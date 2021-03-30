@@ -144,6 +144,11 @@ export class WiredComboLazy extends LitElement {
     `;
   }
 
+  focus(options?: FocusOptions) {
+    super.focus(options);
+    this.setCardShowing(true);
+  }
+
   private refreshDisabledState() {
     if (this.disabled) {
       this.classList.add('wired-disabled');
@@ -240,6 +245,9 @@ export class WiredComboLazy extends LitElement {
     if (changed.has('values')) {
       this.setValues(this.values.slice(0, this.depth));
     }
+    if (changed.has('selected') && !this.selected) {
+      (this.shadowRoot!.getElementById('searchInput') as HTMLInputElement).value = '';
+    }
   }
 
   private getSelectedItemBySelected() {
@@ -269,7 +277,7 @@ export class WiredComboLazy extends LitElement {
       }
     } else {
       // restore focus on the host
-      this.focus();
+      super.focus();
     }
     // only show text when drop-down isn't open
     const text = this.shadowRoot!.getElementById('text') as HTMLElement;
