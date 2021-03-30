@@ -1,6 +1,6 @@
 {
   "name": "@my-handicapped-pet/wired-combo-lazy",
-  "version": "2.0.2",
+  "version": "2.0.2-debug",
   "description": "fork of wiredjs.wired-elements/wired-combo, allows lazy item loadnig for big lists",
   "main": "lib/wired-combo-lazy.js",
   "scripts": {
