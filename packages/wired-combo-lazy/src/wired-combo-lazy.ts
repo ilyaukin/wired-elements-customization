@@ -8,6 +8,92 @@ interface ComboValue {
   text: string;
 }
 
+// todo move this to a separate lib and share with wired-combo
+declare global {
+  interface String {
+    replaceAccent(): string;
+  }
+}
+
+const m = {
+  "À": "A",
+  "Á": "A",
+  "Â": "A",
+  "Ã": "A",
+  "Ä": "A",
+  "Å": "A",
+  "Æ": "AE",
+  "Ç": "C",
+  "È": "E",
+  "É": "E",
+  "Ê": "E",
+  "Ë": "E",
+  "Ì": "I",
+  "Í": "I",
+  "Î": "I",
+  "Ï": "I",
+  "Ð": "D",
+  "Ñ": "N",
+  "Ò": "O",
+  "Ó": "O",
+  "Ô": "O",
+  "Õ": "O",
+  "Ö": "O",
+  "Ø": "O",
+  "Ù": "U",
+  "Ú": "U",
+  "Û": "U",
+  "Ü": "U",
+  "Ý": "Y",
+  "Þ": "p",
+  "ß": "s",
+  "à": "a",
+  "á": "a",
+  "â": "a",
+  "ã": "a",
+  "ä": "a",
+  "å": "a",
+  "æ": "ae",
+  "ç": "c",
+  "è": "e",
+  "é": "e",
+  "ê": "e",
+  "ë": "e",
+  "ì": "i",
+  "í": "i",
+  "î": "i",
+  "ï": "i",
+  "ð": "d",
+  "ñ": "n",
+  "ò": "o",
+  "ó": "o",
+  "ô": "o",
+  "õ": "o",
+  "ö": "o",
+  "ø": "o",
+  "ù": "u",
+  "ú": "u",
+  "û": "u",
+  "ü": "u",
+  "ý": "y",
+  "þ": "p",
+  "ÿ": "y",
+  "Œ": "OE",
+  "œ": "oe",
+  "Š": "S",
+  "š": "s",
+  "Ÿ": "Y",
+  "ƒ": "f"
+}
+const re = new RegExp(`[${Object.keys(m).join('')}]`, 'g');
+String.prototype.replaceAccent = function () {
+  // @ts-ignore
+  return this.replace(re, function (match: string, group: string) {
+    // @ts-ignore
+    return m[match];
+  })
+}
+
 @customElement('wired-combo-lazy')
 export class WiredComboLazy extends LitElement {
   @property({ type: Array }) values: ComboValue[] = [];
@@ -375,11 +461,11 @@ export class WiredComboLazy extends LitElement {
     }
 
     const searchInput = this.shadowRoot!.getElementById('searchInput') as HTMLInputElement;
-    const searchValue = searchInput.value.toLocaleLowerCase();
+    const searchValue = searchInput.value.toLocaleLowerCase().replaceAccent();
 
     // 1) values starting with a search term
     let values = this.values.filter(value => {
-      return value.text?.toLocaleLowerCase().startsWith(searchValue)
+      return value.text?.toLocaleLowerCase()?.replaceAccent()?.startsWith(searchValue)
     }).slice(0, this.depth);
     if (values.length) {
       this.setValues(values);
@@ -389,7 +475,7 @@ export class WiredComboLazy extends LitElement {
 
     // 2) items containing a search term
     values = this.values.filter(value => {
-      return value.text && value.text.toLocaleLowerCase().indexOf(searchValue) !== -1
+      return value.text && value.text.toLocaleLowerCase().replaceAccent().indexOf(searchValue) !== -1
     }).slice(0, this.depth);
     this.setValues(values);
     if (values.length) {
