@@ -412,6 +412,7 @@ export class WiredComboLazy extends LitElement {
       const item = new WiredItem();
       item.value = value.value;
       item.textContent = value.text;
+      item.style.width = '100%';
       itemContainer.appendChild(item);
       this.itemNodes.push(item);
     }
