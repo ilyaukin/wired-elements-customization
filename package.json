@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "NODE_ENV=development webpack serve --config ./webpack.config.dev.js",
-    "build": "lerna run build"
+    "build": "lerna run build",
+    "publish": "npm run build && lerna publish"
   },
   "keywords": [],
   "author": "",
