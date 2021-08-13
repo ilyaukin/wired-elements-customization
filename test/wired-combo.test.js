@@ -104,4 +104,40 @@ describe('wired-combo', () => {
     expect(elementus.items[1].getAttribute('aria-selected')).not.to.exist;
     expect(elementus.items[2].getAttribute('aria-selected')).not.to.exist;
   });
+
+  it('should move to an item according to search input (items added dynamically)', async () => {
+    const code = html`
+    <wired-combo>
+    </wired-combo>
+    `
+    await __fixture(code);
+
+    const addItem = (value, text) => {
+      const item = document.createElement('wired-item');
+      item.setAttribute('value', value);
+      item.innerHTML = text;
+      elementus.appendChild(item);
+    }
+
+    addItem('apple', 'Apple');
+    addItem('banana', 'Banana');
+    addItem('cherry', 'Cherry');
+
+    elementus.shadowRoot.querySelector('#text').click();
+    expect(elementus.items.length).to.be.equal(3);
+    expect(elementus.items[0].innerText).to.be.equal('Apple');
+    expect(elementus.items[1].innerText).to.be.equal('Banana');
+    expect(elementus.items[2].innerText).to.be.equal('Cherry');
+
+    // non selected initially
+    expect(elementus.items[0].getAttribute('aria-selected')).not.to.exist;
+    expect(elementus.items[1].getAttribute('aria-selected')).not.to.exist;
+    expect(elementus.items[2].getAttribute('aria-selected')).not.to.exist;
+
+    // start typing
+    await sendKeys({ type: 'ba' });
+    expect(elementus.items[0].getAttribute('aria-selected')).not.to.exist;
+    expect(elementus.items[1].getAttribute('aria-selected')).to.be.equal('true');
+    expect(elementus.items[2].getAttribute('aria-selected')).not.to.exist;
+  });
 })
