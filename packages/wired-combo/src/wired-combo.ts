@@ -135,7 +135,7 @@ export class WiredCombo extends LitElement {
     <wired-card id="card" tabindex="-1" role="listbox" @mousedown="${this.onItemClick}" @touchstart="${this.onItemClick}"
       style="display: none;">
       <div id="item-container">
-        <slot id="slot"></slot>
+        <slot id="slot" @slotchange="${this.onSlotChange}"></slot>
       </div>
     </wired-card>
     `;
@@ -234,19 +234,6 @@ export class WiredCombo extends LitElement {
 
     // aria
     this.setAttribute('aria-expanded', `${this.cardShowing}`);
-    if (!this.itemNodes.length) {
-      this.itemNodes = [];
-      const nodes = (this.shadowRoot!.getElementById('slot') as HTMLSlotElement).assignedNodes();
-      if (nodes && nodes.length) {
-        for (let i = 0; i < nodes.length; i++) {
-          const element = nodes[i] as WiredItem;
-          if (element.tagName === 'WIRED-ITEM') {
-            element.setAttribute('role', 'option');
-            this.itemNodes.push(element);
-          }
-        }
-      }
-    }
   }
 
   private getSelectedItemBySelected() {
@@ -406,5 +393,19 @@ export class WiredCombo extends LitElement {
   private onCombo(event: Event) {
     event.stopPropagation();
     this.setCardShowing(!this.cardShowing);
+  }
+
+  private onSlotChange() {
+    this.itemNodes = [];
+    const nodes = (this.shadowRoot!.getElementById('slot') as HTMLSlotElement).assignedNodes();
+    if (nodes && nodes.length) {
+      for (let i = 0; i < nodes.length; i++) {
+        const element = nodes[i] as WiredItem;
+        if (element.tagName === 'WIRED-ITEM') {
+          element.setAttribute('role', 'option');
+          this.itemNodes.push(element);
+        }
+      }
+    }
   }
 }
