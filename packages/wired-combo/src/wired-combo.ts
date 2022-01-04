@@ -1,8 +1,8 @@
 import { customElement, property, query, css, TemplateResult, html, LitElement, CSSResult, PropertyValues } from 'lit-element';
-import { rectangle, polygon, fire } from 'wired-lib';
-import { WiredBase } from 'wired-lib/lib/wired-base';
-import { WiredCard } from 'wired-card';
-import { WiredItem } from 'wired-item';
+import { rectangle, polygon, fire } from '@my-handicapped-pet/wired-lib';
+import { WiredBase } from '@my-handicapped-pet/wired-lib/lib/wired-base';
+import { WiredCard } from '@my-handicapped-pet/wired-card';
+import { WiredItem } from '@my-handicapped-pet/wired-item';
 
 interface ComboValue {
   value: string;

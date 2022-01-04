@@ -1,8 +1,11 @@
-# wired-item
+# `@my-handicapped-pet/wired-item`
 
-wired-item is a list item used by Wired components like wired-combo and wired-list-box
+> TODO: description
 
-[wiredjs.com](https://wiredjs.com)
+## Usage
 
-## License
-[MIT License](https://github.com/wiredjs/wired-elements/blob/master/LICENSE) (c) [Preet Shihn](https://twitter.com/preetster)
+```
+const wiredItem = require('@my-handicapped-pet/wired-item');
+
+// TODO: DEMONSTRATE API
+```

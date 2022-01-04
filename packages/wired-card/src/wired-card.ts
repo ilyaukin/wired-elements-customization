@@ -1,5 +1,5 @@
-import { WiredBase, BaseCSS, ResizeObserver } from 'wired-lib/lib/wired-base';
-import { rectangle, line, Point, hachureFill } from 'wired-lib';
+import { WiredBase, BaseCSS, ResizeObserver } from '@my-handicapped-pet/wired-lib/lib/wired-base';
+import { rectangle, line, Point, hachureFill } from '@my-handicapped-pet/wired-lib';
 import { customElement, property, css, TemplateResult, html, CSSResultArray, PropertyValues } from 'lit-element';
 
 @customElement('wired-card')

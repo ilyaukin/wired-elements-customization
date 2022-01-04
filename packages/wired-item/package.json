@@ -1,12 +1,12 @@
 {
-  "name": "wired-item",
+  "name": "@my-handicapped-pet/wired-item",
   "version": "2.0.0",
   "description": "wired-item is a list item used by Wired components like wired-combo and wired-list-box",
   "main": "lib/wired-item.js",
   "module": "lib/wired-item.js",
   "types": "lib/wired-item.d.ts",
   "scripts": {
-    "tsc": "tsc",
+    "build": "rm -rf ./lib && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -16,6 +16,25 @@
   "author": "Preet Shihn",
   "license": "MIT",
   "dependencies": {
-    "wired-lib": "^2.0.0"
+    "@my-handicapped-pet/wired-lib": "^2.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/wiredjs/wired-elements/issues"
+  },
+  "homepage": "https://github.com/wiredjs/wired-elements#readme",
+  "keywords": [
+    "wired",
+    "sketchy",
+    "wired-elements"
+  ],
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

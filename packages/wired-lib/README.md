@@ -1,8 +1,11 @@
-# wired-lib
+# `@my-handicapped-pet/wired-lib`
 
-This is the core rendering library used by all wired ui components.
+> TODO: description
 
-[wiredjs.com](https://wiredjs.com)
+## Usage
 
-## License
-[MIT License](https://github.com/wiredjs/wired-elements/blob/master/LICENSE) (c) [Preet Shihn](https://twitter.com/preetster)
+```
+const wiredLib = require('@my-handicapped-pet/wired-lib');
+
+// TODO: DEMONSTRATE API
+```

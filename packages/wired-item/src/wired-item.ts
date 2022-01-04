@@ -1,6 +1,6 @@
-import { WiredBase, BaseCSS } from 'wired-lib/lib/wired-base';
+import { WiredBase, BaseCSS } from '@my-handicapped-pet/wired-lib/lib/wired-base';
 import { customElement, property, css, TemplateResult, html, CSSResultArray } from 'lit-element';
-import { Point, hachureFill } from 'wired-lib';
+import { Point, hachureFill } from '@my-handicapped-pet/wired-lib';
 
 @customElement('wired-item')
 export class WiredItem extends WiredBase {
