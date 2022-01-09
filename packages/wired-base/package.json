@@ -1,0 +1,39 @@
+{
+  "name": "@my-handicapped-pet/wired-base",
+  "version": "2.0.5",
+  "description": "Base class for wired-elements",
+  "keywords": [
+    "wired",
+    "sketch",
+    "element",
+    "component"
+  ],
+  "author": "Ilya Lyaukin <kzerby@gmail.com>",
+  "homepage": "https://github.com/ilyaukin/wired-elements-customization#readme",
+  "license": "MIT",
+  "main": "lib/wired-base.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ilyaukin/wired-elements-customization.git"
+  },
+  "scripts": {
+    "build": "rm -rf ./lib && tsc",
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/ilyaukin/wired-elements-customization/issues"
+  },
+  "dependencies": {
+    "@my-handicapped-pet/wired-lib": "^2.0.0"
+  }
+}

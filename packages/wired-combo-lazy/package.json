@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/ilyaukin/wired-elements-customization#readme",
   "dependencies": {
+    "@my-handicapped-pet/wired-base": "^2.0.5",
     "@my-handicapped-pet/wired-card": "^2.0.0",
     "@my-handicapped-pet/wired-item": "^2.0.0",
     "@my-handicapped-pet/wired-lib": "^2.0.0",

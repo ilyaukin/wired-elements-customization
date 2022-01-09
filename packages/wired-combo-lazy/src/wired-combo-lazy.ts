@@ -1,5 +1,6 @@
-import { customElement, property, query, css, TemplateResult, html, LitElement, CSSResult, PropertyValues } from 'lit-element';
-import { rectangle, polygon, fire } from '@my-handicapped-pet/wired-lib';
+import { css, CSSResult, customElement, html, property, PropertyValues, query, TemplateResult } from 'lit-element';
+import { fire } from '@my-handicapped-pet/wired-lib';
+import { WiredBase } from "@my-handicapped-pet/wired-base";
 import { WiredCard } from '@my-handicapped-pet/wired-card';
 import { WiredItem } from '@my-handicapped-pet/wired-item';
 
@@ -95,13 +96,12 @@ String.prototype.replaceAccent = function () {
 }
 
 @customElement('wired-combo-lazy')
-export class WiredComboLazy extends LitElement {
+export class WiredComboLazy extends WiredBase {
   @property({ type: Array }) values: ComboValue[] = [];
   @property({ type: Object }) value?: ComboValue;
   @property({ type: String }) selected?: string;
   @property({ type: Boolean, reflect: true }) disabled = false;
 
-  @query('svg') private svg?: SVGSVGElement;
   @query('#card') private card?: WiredCard;
 
   private cardShowing = false;
@@ -194,6 +194,7 @@ export class WiredComboLazy extends LitElement {
     
     #searchInput {
       display: none;
+      outline: none;
       position: absolute;
       top: 0;
       left: 0;
@@ -211,12 +212,12 @@ export class WiredComboLazy extends LitElement {
     return html`
     <input id="searchInput" @keyup="${this.onSearch}">
     <div id="container" @click="${this.onCombo}">
-      <div id="textPanel" class="inline">
+      <div id="textPanel" class="inline" data-wired-shape="rectangle">
         <div id="text">
           <span>${this.value && this.value.text}</span>
         </div>
       </div>
-      <div id="dropPanel" class="inline"></div>
+      <div id="dropPanel" class="inline" data-wired-shape="rectangle;arrow-down:offset-top=5,offset-left=8,offset-bottom=5,offset-right=8"></div>
       <div class="overlay">
         <svg id="svg"></svg>
       </div>
@@ -233,15 +234,6 @@ export class WiredComboLazy extends LitElement {
   focus(options?: FocusOptions) {
     super.focus(options);
     this.setCardShowing(true);
-  }
-
-  private refreshDisabledState() {
-    if (this.disabled) {
-      this.classList.add('wired-disabled');
-    } else {
-      this.classList.remove('wired-disabled');
-    }
-    this.tabIndex = this.disabled ? -1 : +(this.getAttribute('tabindex') || 0);
   }
 
   firstUpdated() {
@@ -303,28 +295,9 @@ export class WiredComboLazy extends LitElement {
     if (changed.has('disabled')) {
       this.refreshDisabledState();
     }
-    const svg = this.svg!;
-    while (svg.hasChildNodes()) {
-      svg.removeChild(svg.lastChild!);
-    }
-    const s = this.shadowRoot!.getElementById('container')!.getBoundingClientRect();
-    svg.setAttribute('width', `${s.width}`);
-    svg.setAttribute('height', `${s.height}`);
     const textBounds = this.shadowRoot!.getElementById('textPanel')!.getBoundingClientRect();
     this.shadowRoot!.getElementById('dropPanel')!.style.minHeight = textBounds.height + 'px';
-    rectangle(svg, 0, 0, textBounds.width, textBounds.height);
-    const dropx = textBounds.width - 4;
-    rectangle(svg, dropx, 0, 34, textBounds.height);
-    const dropOffset = Math.max(0, Math.abs((textBounds.height - 24) / 2));
-    const poly = polygon(svg, [
-      [dropx + 8, 5 + dropOffset],
-      [dropx + 26, 5 + dropOffset],
-      [dropx + 17, dropOffset + Math.min(textBounds.height, 18)]
-    ]);
-    poly.style.fill = 'currentColor';
-    poly.style.pointerEvents = this.disabled ? 'none' : 'auto';
-    poly.style.cursor = 'pointer';
-    this.classList.add('wired-rendered');
+    super.updated(changed);
 
     // aria
     this.setAttribute('aria-expanded', `${this.cardShowing}`);
@@ -334,6 +307,15 @@ export class WiredComboLazy extends LitElement {
     if (changed.has('selected') && !this.selected) {
       (this.shadowRoot!.getElementById('searchInput') as HTMLInputElement).value = '';
     }
+  }
+
+  private refreshDisabledState() {
+    if (this.disabled) {
+      this.classList.add('wired-disabled');
+    } else {
+      this.classList.remove('wired-disabled');
+    }
+    this.tabIndex = this.disabled ? -1 : +(this.getAttribute('tabindex') || 0);
   }
 
   private getSelectedItemBySelected() {

@@ -283,3 +283,9 @@ export function fire(element: HTMLElement, name: string, detail?: any, bubbles: 
     element.dispatchEvent(new CE(name, init));
   }
 }
+
+export function debugLog(s: string) {
+  if ((window as any).__debug) {
+    console.log(s);
+  }
+}

@@ -1,8 +1,9 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import '../packages/wired-combo-lazy/src/wired-combo-lazy';
-// import '../packages/wired-combo/src/wired-combo';
-// import 'wired-item';
+// import '../packages/wired-combo-lazy/src/wired-combo-lazy';
+import '/packages/wired-combo/src/wired-combo';
+import '/packages/wired-item/src/wired-item';
+import { expect } from "@open-wc/testing";
 
 const App = () => {
   function getItems() {
@@ -35,16 +36,29 @@ const App = () => {
   //   </wired-combo>
   // </div>
   //
+  // React.useEffect(() => {
+  //   document.getElementById("combo").values = getValues();
+  //   document.getElementById("combo").addEventListener("selected",
+  //     (e) => console.log(e.detail));
+  //   document.getElementById("combo").focus();
+  // })
+
   React.useEffect(() => {
-    document.getElementById("combo").values = getValues();
-    document.getElementById("combo").addEventListener("selected",
-      (e) => console.log(e.detail));
-    document.getElementById("combo").focus();
+    const addItem = (value, text) => {
+      const item = document.createElement('wired-item');
+      item.setAttribute('value', value);
+      item.innerHTML = text;
+      document.getElementById("combo").appendChild(item);
+    }
+
+    addItem('apple', 'Apple');
+    addItem('banana', 'Banana');
+    addItem('cherry', 'Cherry');
   })
 
   return <div>
-    <wired-combo-lazy id='combo'>
-    </wired-combo-lazy>
+    <wired-combo id="combo">
+    </wired-combo>
   </div>
 }
 

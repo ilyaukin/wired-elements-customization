@@ -31,7 +31,7 @@ path {
 }
 `;
 
-export abstract class WiredBase extends LitElement {
+export abstract class WiredBaseLegacy extends LitElement {
   @query('svg') protected svg?: SVGSVGElement;
   protected lastSize: Point = [0, 0];
 

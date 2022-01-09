@@ -1,6 +1,6 @@
-import { WiredBase, BaseCSS } from '@my-handicapped-pet/wired-lib/lib/wired-base';
-import { customElement, property, css, TemplateResult, html, CSSResultArray } from 'lit-element';
-import { Point, hachureFill } from '@my-handicapped-pet/wired-lib';
+import { BaseCSS } from '@my-handicapped-pet/wired-lib/lib/wired-base-legacy';
+import { css, CSSResultArray, customElement, html, property, PropertyValues, TemplateResult } from 'lit-element';
+import { WiredBase } from "@my-handicapped-pet/wired-base";
 
 @customElement('wired-item')
 export class WiredItem extends WiredBase {
@@ -88,18 +88,8 @@ export class WiredItem extends WiredBase {
     </button>`;
   }
 
-  protected canvasSize(): Point {
-    const s = this.getBoundingClientRect();
-    return [s.width, s.height];
-  }
-
-  protected draw(svg: SVGSVGElement, size: Point) {
-    const g = hachureFill([
-      [0, 0],
-      [size[0], 0],
-      [size[0], size[1]],
-      [0, size[1]]
-    ]);
-    svg.appendChild(g);
+  protected firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+    this.setAttribute(WiredBase.SHAPE_ATTR, 'rectangle:fill=hachure,border=none');
   }
 }

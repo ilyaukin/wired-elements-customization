@@ -16,7 +16,9 @@ run component tests<br>
 `npm run test`
 
 to add new component<br>
-`lerna create @my-handicapped-pet/wired-new-comp packages/wired-new-comp`
+ - `lerna create @my-handicapped-pet/wired-new-comp packages/wired-new-comp`
+ - change "build" script (copy from some other package)
+ - copy `tsconfig.json`
 
 to publish version<br>
 `lerna publish`
@@ -28,5 +30,6 @@ to publish version<br>
 * consider merge component and frontend repo
   * app as one of packages??
   * then how to deal with `publish` etc.?
+  * or just local import as in current `App.jsx`
 
 * consider add and publish demo app (page)
