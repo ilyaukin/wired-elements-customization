@@ -1,8 +1,8 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 // import '../packages/wired-combo-lazy/src/wired-combo-lazy';
-import '/packages/wired-combo/src/wired-combo';
-import '/packages/wired-item/src/wired-item';
+import '/packages/wired-combo';
+import '/packages/wired-item';
 import { expect } from "@open-wc/testing";
 
 const App = () => {

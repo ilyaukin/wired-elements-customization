@@ -1,7 +1,7 @@
 import { expect, fixture, html } from '@open-wc/testing';
 import { sendKeys } from '@web/test-runner-commands';
 import { TemplateResult } from "lit-element";
-import '../packages/wired-combo/lib/wired-combo';
+import '..';
 
 interface WiredComboElement extends HTMLElement {
   container: HTMLElement;

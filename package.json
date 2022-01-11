@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm run build && web-test-runner \"test/**/*.test.ts\" --node-resolve",
-    "test:watch": "npm run build && web-test-runner \"test/**/*.test.ts\" --node-resolve --watch",
+    "test": "npm run build && web-test-runner --node-resolve",
+    "test:watch": "npm run build && web-test-runner --node-resolve --watch",
     "start": "NODE_ENV=development webpack serve --config ./webpack.config.dev.js",
     "build": "lerna run build",
     "publish": "npm run build && lerna publish"
