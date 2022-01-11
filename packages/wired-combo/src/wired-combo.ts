@@ -24,97 +24,100 @@ export class WiredCombo extends WiredBase {
   static get styles(): CSSResult {
     return css`
       :host {
+        width: 140px;
         display: inline-block;
         font-family: inherit;
-      position: relative;
-      outline: none;
-      opacity: 0;
-    }
-  
-    :host(.wired-disabled) {
-      opacity: 0.5 !important;
-      cursor: default;
-      pointer-events: none;
-      background: rgba(0, 0, 0, 0.02);
-    }
-    
-    :host(.wired-rendered) {
-      opacity: 1;
-    }
+        position: relative;
+        outline: none;
+        opacity: 0;
+      }
 
-    :host(:focus-within) path {
-      stroke-width: 1.5;
-    }
-  
-    #container {
-      white-space: nowrap;
-      position: relative;
-    }
-  
-    .inline {
-      display: inline-block;
-      vertical-align: top
-    }
-  
-    #textPanel {
-      min-width: 90px;
-      min-height: 18px;
-      padding: 8px;
-    }
-  
-    #dropPanel {
-      width: 34px;
-      cursor: pointer;
-    }
-  
-    .overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-    }
-  
-    svg {
-      display: block;
-    }
-  
-    path {
-      stroke: currentColor;
-      stroke-width: 0.7;
-      fill: transparent;
-    }
-  
-    #card {
-      position: absolute;
-      background: var(--wired-combo-popup-bg, white);
-      z-index: 1;
-      box-shadow: 1px 5px 15px -6px rgba(0, 0, 0, 0.8);
-    }
+      :host(.wired-disabled) {
+        opacity: 0.5 !important;
+        cursor: default;
+        pointer-events: none;
+        background: rgba(0, 0, 0, 0.02);
+      }
 
-    #item-container {
-      max-height: 200px;
-      overflow-y: scroll;
-    }
+      :host(.wired-rendered) {
+        opacity: 1;
+      }
 
-    ::slotted(wired-item) {
-      display: block;
-    }
-    
-    #searchInput {
-      display: none;
-      outline: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      border: none;
-      padding: 8px;
-      font-size: inherit;
-      font-family: inherit;
-      /* for debug */
-      /*background-color: gray;*/
-    }
+      :host(:focus-within) path {
+        stroke-width: 1.5;
+      }
+
+      #container {
+        white-space: nowrap;
+        position: relative;
+      }
+
+      .inline {
+        display: inline-block;
+        vertical-align: top
+      }
+
+      #textPanel {
+        width: calc(100% - 50px);
+        min-height: 18px;
+        padding: 8px;
+      }
+
+      #dropPanel {
+        width: 34px;
+        cursor: pointer;
+      }
+
+      .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+      }
+
+      svg {
+        display: block;
+      }
+
+      path {
+        stroke: currentColor;
+        stroke-width: 0.7;
+        fill: transparent;
+      }
+
+      #card {
+        width: calc(100% - 20px);
+        position: absolute;
+        background: var(--wired-combo-popup-bg, white);
+        z-index: 1;
+        box-shadow: 1px 5px 15px -6px rgba(0, 0, 0, 0.8);
+      }
+
+      #item-container {
+        max-height: 200px;
+        overflow-y: scroll;
+      }
+
+      ::slotted(wired-item) {
+        display: block;
+      }
+
+      #searchInput {
+        width: calc(100% - 50px);
+        display: none;
+        outline: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border: none;
+        padding: 8px;
+        font-size: inherit;
+        font-family: inherit;
+        /* for debug */
+        /*background-color: gray;*/
+      }
     `;
   }
 
@@ -126,8 +129,8 @@ export class WiredCombo extends WiredBase {
         <div id="text">
           <span>${this.value && this.value.text}</span>
         </div>
-      </div>
-      <div id="dropPanel" class="inline" data-wired-shape="rectangle;arrow-down:offset-top=5,offset-left=8,offset-bottom=5,offset-right=8"></div>
+      </div><!-- to remove whitespace
+      --><div id="dropPanel" class="inline" data-wired-shape="rectangle;arrow-down:offset-top=5,offset-left=8,offset-bottom=5,offset-right=8"></div>
       <div class="overlay">
         <svg id="svg"></svg>
       </div>
@@ -251,7 +254,7 @@ export class WiredCombo extends WiredBase {
     }
     // only show text when drop-down isn't open
     const text = this.shadowRoot!.getElementById('text') as HTMLElement;
-    text.style.display = showing ? 'none': '';
+    text.style.display = showing ? 'none' : '';
     if (showing) {
       setTimeout(() => {
         this.card!.requestUpdate();

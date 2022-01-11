@@ -54,6 +54,7 @@ const App = () => {
     addItem('apple', 'Apple');
     addItem('banana', 'Banana');
     addItem('cherry', 'Cherry');
+    addItem('long', 'Some fruit with long-long naaaame');
   })
 
   return <div>

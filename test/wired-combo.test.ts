@@ -172,6 +172,6 @@ describe('wired-combo', () => {
     const r2 = elementus.card.getBoundingClientRect();
     const r3 = elementus.searchInput.getBoundingClientRect();
     expect(r1.width).to.be.equal(r2.width);
-    expect(r2.width).to.be.equal(r3.width);
+    expect(r1.width).to.be.equal(r3.width + 34 /*dropdown width*/);
   });
 })

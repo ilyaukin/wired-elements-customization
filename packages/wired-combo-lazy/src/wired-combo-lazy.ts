@@ -114,6 +114,7 @@ export class WiredComboLazy extends WiredBase {
   static get styles(): CSSResult {
     return css`
     :host {
+      width: 140px;
       display: inline-block;
       font-family: inherit;
       position: relative;
@@ -147,7 +148,7 @@ export class WiredComboLazy extends WiredBase {
     }
   
     #textPanel {
-      min-width: 90px;
+      width: calc(100% - 50px);
       min-height: 18px;
       padding: 8px;
     }
@@ -177,6 +178,7 @@ export class WiredComboLazy extends WiredBase {
     }
   
     #card {
+      width: calc(100% - 20px);
       position: absolute;
       background: var(--wired-combo-popup-bg, white);
       z-index: 1;
@@ -193,6 +195,7 @@ export class WiredComboLazy extends WiredBase {
     }
     
     #searchInput {
+      width: calc(100% - 50px);
       display: none;
       outline: none;
       position: absolute;
@@ -216,8 +219,8 @@ export class WiredComboLazy extends WiredBase {
         <div id="text">
           <span>${this.value && this.value.text}</span>
         </div>
-      </div>
-      <div id="dropPanel" class="inline" data-wired-shape="rectangle;arrow-down:offset-top=5,offset-left=8,offset-bottom=5,offset-right=8"></div>
+      </div><!-- to remove whitespace
+      --><div id="dropPanel" class="inline" data-wired-shape="rectangle;arrow-down:offset-top=5,offset-left=8,offset-bottom=5,offset-right=8"></div>
       <div class="overlay">
         <svg id="svg"></svg>
       </div>
