@@ -28,8 +28,7 @@ to publish version<br>
 * pull changes from the original repo (how? patch? is there any easier way?)
 
 * consider merge component and frontend repo
-  * app as one of packages??
-  * then how to deal with `publish` etc.?
-  * or just local import as in current `App.jsx`
+  + just local import as in current `App.jsx`
+  * `publish` version at the time of merge to master?
 
 * consider add and publish demo app (page)
